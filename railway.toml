@@ -1,0 +1,13 @@
+[project]
+name = "agentic-commerce-gateway"
+
+deployments = [
+  { service = "web" }
+]
+
+[services.web]
+start = "npm run start"
+build = "npm run build"
+
+[services.web.env]
+NEXT_TELEMETRY_DISABLED = "1"

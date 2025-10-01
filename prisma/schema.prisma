@@ -1,0 +1,67 @@
+// Prisma schema capturing merchants, products, and orders required for the Agentic Commerce Gateway
+// Run `npx prisma generate` after installing the Prisma CLI to generate the client.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id        String    @id @default(cuid())
+  name      String
+  platform  String
+  acpKeys   Json?
+  ap2Keys   Json?
+  products  Product[]
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  name        String
+  sku         String?
+  price       Float
+  currency    String   @default("USD")
+  stock       Int?
+  formatACP   Json?
+  formatAP2   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id             String    @id @default(cuid())
+  merchantId     String
+  merchant       Merchant  @relation(fields: [merchantId], references: [id])
+  productId      String
+  product        Product   @relation(fields: [productId], references: [id])
+  protocol       Protocol
+  status         OrderStatus
+  externalId     String?
+  amount         Float
+  currency       String   @default("USD")
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Protocol {
+  ACP
+  AP2
+}
+
+enum OrderStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  CANCELED
+}
